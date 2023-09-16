@@ -8,8 +8,8 @@ public class MrClockworkController : MonoBehaviour
     public int maxHp = 3;
     private int currentHp;
 
-    private float speed = 1f;
-    private Vector2 offset = new Vector2(1f, 0f);
+    public float moveSpeed = 5f;
+    public Vector2 offset = new Vector2(10f, 0f);
 
     private Animator animator;
     private Rigidbody2D rigidbody2d;
@@ -18,12 +18,14 @@ public class MrClockworkController : MonoBehaviour
     private Vector2 lookDirection = new Vector2(1, 0);
     private Vector2 direction;
 
-    public float duration = 10.0f;
-    private float elapsedTime = 0.0f;
+    private Vector2 pointA;
+    private Vector2 pointB;
+    private Vector2 currentTarget;
 
-    private Vector2 leftPos;
-    private Vector2 rightPos;
+    private Vector2 targetPosition;
+    private Vector2 newPosition;
 
+    private bool isFixed = false;
 
     // Start is called before the first frame update
     void Awake()
@@ -36,17 +38,21 @@ public class MrClockworkController : MonoBehaviour
     private void Start()
     {
         currentHp = maxHp;
-        leftPos = rigidbody2d.position - offset;
-        rightPos = rigidbody2d.position + offset;
+        pointA = rigidbody2d.position - offset;
+        pointB = rigidbody2d.position + offset;
+        currentTarget = pointA;
     }
 
     private void FixedUpdate()
     {
+        if (isFixed)
+            return;
+
         ////transform.position += direction * speed * Time.deltaTime;
         //Vector2 position = rigidbody2d.position;
         //position += direction * speed * Time.fixedDeltaTime;
         //rigidbody2d.MovePosition(position);
-        Wander();
+        PatrolPhysics();
 
     }
 
@@ -54,13 +60,9 @@ public class MrClockworkController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        elapsedTime += Time.deltaTime;
-
-        var h = Input.GetAxis("Horizontal");
-        var v = Input.GetAxis("Vertical");
-
-        direction = new Vector3(h, v);
-
+        if (isFixed)
+            return;
+        Patrol();
         var directionMag = direction.magnitude;
         if (directionMag > 1f)
         {
@@ -77,19 +79,33 @@ public class MrClockworkController : MonoBehaviour
         animator.SetFloat("Look Y", lookDirection.y);
     }
 
-    public void Wander()
+    public void PatrolPhysics()
+    {
+        targetPosition = currentTarget;
+        newPosition = Vector2.MoveTowards(rigidbody2d.position, targetPosition, moveSpeed * Time.deltaTime);
+        rigidbody2d.MovePosition(newPosition);
+    }
+
+    public void Patrol()
     {
 
-        float t = Mathf.Sin(Mathf.Clamp01(elapsedTime / duration) * Mathf.PI * 2);
+        // 방향을 계산하여 애니메이션 매개 변수 설정
+        direction = (targetPosition - rigidbody2d.position).normalized;
 
-        if(elapsedTime > duration)
+
+
+        if (Vector2.Distance(rigidbody2d.position, targetPosition) < 0.01f)
         {
-            elapsedTime = 0;
+            if (currentTarget == pointA)
+            {
+                currentTarget = pointB;
+            }
+            else
+            {
+                currentTarget = pointA;
+            }
         }
 
-        Vector2 position = rigidbody2d.position;
-        position = Vector2.Lerp(leftPos, rightPos, t);
-        rigidbody2d.MovePosition(position);
     }
 
     public void TakeDamage(int damage)
@@ -104,8 +120,9 @@ public class MrClockworkController : MonoBehaviour
 
     public void OnDie()
     {
+        isFixed = true;
         animator.SetTrigger("Fix");
-        boxCollider2d.isTrigger = true;
+        boxCollider2d.enabled = false;
 
     }
 

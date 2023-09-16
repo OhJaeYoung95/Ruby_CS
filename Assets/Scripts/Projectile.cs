@@ -5,7 +5,7 @@ using UnityEngine;
 public class Projectile : MonoBehaviour
 {
     private Rigidbody2D rigidbody2d;
-
+    public int damage = 1;
     private void Awake()
     {
         rigidbody2d = GetComponent<Rigidbody2D>();
@@ -21,7 +21,7 @@ public class Projectile : MonoBehaviour
     {
         if(collision.CompareTag("Enemy"))
         {
-            // 적 데미지 적용
+            collision.GetComponent<MrClockworkController>().TakeDamage(damage);
             Destroy(gameObject);
         }
     }

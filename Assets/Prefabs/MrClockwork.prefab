@@ -194,4 +194,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHp: 5
-  timeInvincible: 1
+  moveSpeed: 5
+  offset: {x: 10, y: 0}
