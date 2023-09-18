@@ -10607,14 +10607,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: MrClockwork (1)
       objectReference: {fileID: 0}
-    - target: {fileID: 3695195324785802325, guid: b4c03c79b4f6a9241aaafe1f02c1b46d, type: 3}
-      propertyPath: offset.x
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 3695195324785802325, guid: b4c03c79b4f6a9241aaafe1f02c1b46d, type: 3}
-      propertyPath: offset.y
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 7904129209293755510, guid: b4c03c79b4f6a9241aaafe1f02c1b46d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.12326622

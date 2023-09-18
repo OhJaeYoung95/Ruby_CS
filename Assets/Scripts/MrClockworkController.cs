@@ -15,6 +15,7 @@ public class MrClockworkController : MonoBehaviour
     public int maxHp = 3;
     private int currentHp;
     private int preHp;
+    private Queue<int> preHpQueue = new Queue<int>();
 
     public float moveSpeed = 5f;
     public Vector2 offset = new Vector2(10f, 0f);
@@ -39,6 +40,7 @@ public class MrClockworkController : MonoBehaviour
     private bool isHit = false;
     public float timeHit = 0.5f;
     private float hitTimer;
+
 
 
     // Start is called before the first frame update
@@ -79,19 +81,20 @@ public class MrClockworkController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (isFixed)
-            return;
 
         if(isHit)
         {
             LerpHpUI();
             hitTimer -= Time.deltaTime;
-            if(hitTimer < 0)
+            if(hitTimer < 0 && preHpQueue.Count == 0)
             {
                 isHit = false;
                 spriteRenderer.color = Color.white;
             }
         }
+
+        if (isFixed)
+            return;
 
         Patrol();
         var directionMag = direction.magnitude;
@@ -133,17 +136,19 @@ public class MrClockworkController : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        if(!isHit && preHpQueue.Count == 0)
+            preHp = currentHp;
+        if (isHit)
+            preHpQueue.Enqueue(currentHp);
         isHit = true;
 
         spriteRenderer.color = Color.red;
         hitTimer = timeHit;
-        preHp = currentHp;
         currentHp = Math.Clamp(currentHp - damage, 0, maxHp);
         
         attackEffect.Stop();
         attackEffect.Play();
 
-        Debug.Log(currentHp);
         if(currentHp <= 0f)
         {
             OnDie();
@@ -152,7 +157,7 @@ public class MrClockworkController : MonoBehaviour
 
     public void OnDie()
     {
-        isFixed = true;
+        hpGauageUI.color = Color.gray;
         spriteRenderer.color = Color.white;
         hpGauageUI.fillAmount = 0;
         animator.SetTrigger("Fix");
@@ -163,10 +168,14 @@ public class MrClockworkController : MonoBehaviour
 
         attackEffect.Play();
 
+        isFixed = true;
     }
     public void LerpHpUI()
     {
-        hpGauageUI.fillAmount = (Mathf.Lerp(currentHp, preHp, hitTimer / timeHit) / (float)maxHp);
+        if(preHpQueue.Count == 0)
+            hpGauageUI.fillAmount = (Mathf.Lerp(currentHp, preHp, hitTimer / timeHit) / (float)maxHp);
+        else
+            hpGauageUI.fillAmount = (Mathf.Lerp(currentHp, preHpQueue.Dequeue(), hitTimer / timeHit) / (float)maxHp);
     }
 
     IEnumerator CoTakeDamage()

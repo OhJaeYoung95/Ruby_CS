@@ -201,8 +201,9 @@ MonoBehaviour:
   attackEffect: {fileID: 1990797754761686469}
   maxHp: 5
   moveSpeed: 5
-  offset: {x: 0, y: 5}
-  timeHit: 0.3
+  offset: {x: 5, y: 0}
+  timeHit: 1
+  deadHpUIColor: {r: 0.5566038, g: 0.5566038, b: 0.5566038, a: 0}
 --- !u!1 &2610468390341215636
 GameObject:
   m_ObjectHideFlags: 0
