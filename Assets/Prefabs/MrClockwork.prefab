@@ -202,6 +202,7 @@ MonoBehaviour:
   maxHp: 5
   moveSpeed: 5
   offset: {x: 0, y: 5}
+  timeHit: 0.3
 --- !u!1 &2610468390341215636
 GameObject:
   m_ObjectHideFlags: 0

@@ -14,6 +14,7 @@ public class MrClockworkController : MonoBehaviour
 
     public int maxHp = 3;
     private int currentHp;
+    private int preHp;
 
     public float moveSpeed = 5f;
     public Vector2 offset = new Vector2(10f, 0f);
@@ -21,6 +22,7 @@ public class MrClockworkController : MonoBehaviour
     private Animator animator;
     private Rigidbody2D rigidbody2d;
     private BoxCollider2D boxCollider2d;
+    private SpriteRenderer spriteRenderer;
 
     private Vector2 lookDirection = new Vector2(1, 0);
     private Vector2 direction;
@@ -34,12 +36,18 @@ public class MrClockworkController : MonoBehaviour
 
     private bool isFixed = false;
 
+    private bool isHit = false;
+    public float timeHit = 0.5f;
+    private float hitTimer;
+
+
     // Start is called before the first frame update
     void Awake()
     {
         animator = GetComponent<Animator>();
         rigidbody2d = GetComponent<Rigidbody2D>();
         boxCollider2d = GetComponent<BoxCollider2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     private void Start()
@@ -73,6 +81,18 @@ public class MrClockworkController : MonoBehaviour
     {
         if (isFixed)
             return;
+
+        if(isHit)
+        {
+            LerpHpUI();
+            hitTimer -= Time.deltaTime;
+            if(hitTimer < 0)
+            {
+                isHit = false;
+                spriteRenderer.color = Color.white;
+            }
+        }
+
         Patrol();
         var directionMag = direction.magnitude;
         if (directionMag > 1f)
@@ -113,10 +133,15 @@ public class MrClockworkController : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        isHit = true;
+
+        spriteRenderer.color = Color.red;
+        hitTimer = timeHit;
+        preHp = currentHp;
         currentHp = Math.Clamp(currentHp - damage, 0, maxHp);
+        
         attackEffect.Stop();
         attackEffect.Play();
-        hpGauageUI.fillAmount = (float)currentHp / (float)maxHp;
 
         Debug.Log(currentHp);
         if(currentHp <= 0f)
@@ -128,6 +153,8 @@ public class MrClockworkController : MonoBehaviour
     public void OnDie()
     {
         isFixed = true;
+        spriteRenderer.color = Color.white;
+        hpGauageUI.fillAmount = 0;
         animator.SetTrigger("Fix");
         boxCollider2d.enabled = false;
         smogEffect.Stop();
@@ -136,6 +163,10 @@ public class MrClockworkController : MonoBehaviour
 
         attackEffect.Play();
 
+    }
+    public void LerpHpUI()
+    {
+        hpGauageUI.fillAmount = (Mathf.Lerp(currentHp, preHp, hitTimer / timeHit) / (float)maxHp);
     }
 
     IEnumerator CoTakeDamage()

@@ -15,6 +15,7 @@ public class RubyController : MonoBehaviour
     public float projectileForce = 10f;
 
     public int maxHp = 10;
+    private int preHp;
     [SerializeField]
     private int currentHp;
 
@@ -69,6 +70,7 @@ public class RubyController : MonoBehaviour
 
         if (isInvincible)
         {
+            LerpHpUI();
             invincibleTimer -= Time.deltaTime;
             if(invincibleTimer < 0)
             {
@@ -117,9 +119,9 @@ public class RubyController : MonoBehaviour
     {
         if (isInvincible)
             return;
-        hpGauageUI.fillAmount = (float)((float)currentHp / (float)maxHp);
 
         spriteRenderer.color = Color.red;
+        preHp = currentHp;
         currentHp = Math.Clamp(currentHp - damage, 0, maxHp);
 
         isInvincible = true;
@@ -137,6 +139,11 @@ public class RubyController : MonoBehaviour
         currentHp = Math.Clamp(currentHp + addHp, 0, maxHp);
         SetClipNPlay(pickupItem);
         Debug.Log($"Heal After : {currentHp}");
+    }
+
+    public void LerpHpUI()
+    {
+        hpGauageUI.fillAmount = (Mathf.Lerp(currentHp, preHp, invincibleTimer / timeInvincible) / (float)maxHp);
     }
 
     public void SetClipNPlay(AudioClip setClip)
