@@ -3,8 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
+
 public class MrClockworkController : MonoBehaviour
 {
+    public Image hpGauageUI;
+
+    public ParticleSystem smogEffect;
+    public ParticleSystem attackEffect;
+
     public int maxHp = 3;
     private int currentHp;
 
@@ -32,7 +39,7 @@ public class MrClockworkController : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         rigidbody2d = GetComponent<Rigidbody2D>();
-        boxCollider2d=  GetComponent<BoxCollider2D>();
+        boxCollider2d = GetComponent<BoxCollider2D>();
     }
 
     private void Start()
@@ -41,6 +48,10 @@ public class MrClockworkController : MonoBehaviour
         pointA = rigidbody2d.position - offset;
         pointB = rigidbody2d.position + offset;
         currentTarget = pointA;
+        smogEffect.Play();
+        attackEffect.Stop();
+
+        hpGauageUI.fillAmount = currentHp / maxHp;
     }
 
     private void FixedUpdate()
@@ -88,22 +99,14 @@ public class MrClockworkController : MonoBehaviour
 
     public void Patrol()
     {
-
-        // 방향을 계산하여 애니메이션 매개 변수 설정
         direction = (targetPosition - rigidbody2d.position).normalized;
-
-
 
         if (Vector2.Distance(rigidbody2d.position, targetPosition) < 0.01f)
         {
             if (currentTarget == pointA)
-            {
                 currentTarget = pointB;
-            }
             else
-            {
                 currentTarget = pointA;
-            }
         }
 
     }
@@ -111,6 +114,10 @@ public class MrClockworkController : MonoBehaviour
     public void TakeDamage(int damage)
     {
         currentHp = Math.Clamp(currentHp - damage, 0, maxHp);
+        attackEffect.Stop();
+        attackEffect.Play();
+        hpGauageUI.fillAmount = (float)currentHp / (float)maxHp;
+
         Debug.Log(currentHp);
         if(currentHp <= 0f)
         {
@@ -123,6 +130,11 @@ public class MrClockworkController : MonoBehaviour
         isFixed = true;
         animator.SetTrigger("Fix");
         boxCollider2d.enabled = false;
+        smogEffect.Stop();
+        var mainModule = attackEffect.main;
+        mainModule.loop = true;
+
+        attackEffect.Play();
 
     }
 

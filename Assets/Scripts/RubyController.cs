@@ -3,13 +3,19 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class RubyController : MonoBehaviour
 {
+    public Image hpGauageUI;
+
+    private ParticleSystem hitParticle;
+
     public Projectile projectilePrefab;
     public float projectileForce = 10f;
 
-    public int maxHp = 5;
+    public int maxHp = 10;
+    [SerializeField]
     private int currentHp;
 
     private float speed = 4f;
@@ -38,11 +44,14 @@ public class RubyController : MonoBehaviour
         rigidbody2d = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         audioSource = GetComponent<AudioSource>();
+        hitParticle = GetComponentInChildren<ParticleSystem>();
     }
 
     private void Start()
     {
         currentHp = maxHp;
+        hpGauageUI.fillAmount = currentHp / maxHp;
+        //hitParticle.Stop();
     }
 
     private void FixedUpdate()
@@ -57,7 +66,8 @@ public class RubyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(isInvincible)
+
+        if (isInvincible)
         {
             invincibleTimer -= Time.deltaTime;
             if(invincibleTimer < 0)
@@ -107,6 +117,7 @@ public class RubyController : MonoBehaviour
     {
         if (isInvincible)
             return;
+        hpGauageUI.fillAmount = (float)((float)currentHp / (float)maxHp);
 
         spriteRenderer.color = Color.red;
         currentHp = Math.Clamp(currentHp - damage, 0, maxHp);
@@ -116,6 +127,8 @@ public class RubyController : MonoBehaviour
 
         animator.SetTrigger("Hit");
         SetClipNPlay(hitSound);
+        hitParticle.Stop();
+        hitParticle.Play();
     }
 
     public void AddHp(int addHp)
