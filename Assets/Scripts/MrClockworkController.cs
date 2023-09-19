@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class MrClockworkController : MonoBehaviour
 {
     public Image hpGauageUI;
+    public Image hpFrameUI;
 
     public ParticleSystem smogEffect;
     public ParticleSystem attackEffect;
@@ -91,6 +92,12 @@ public class MrClockworkController : MonoBehaviour
                 isHit = false;
                 spriteRenderer.color = Color.white;
             }
+        }
+
+        if(isFixed && !isHit)
+        {
+            hpGauageUI.gameObject.SetActive(false);
+            hpFrameUI.gameObject.SetActive(false);
         }
 
         if (isFixed)
